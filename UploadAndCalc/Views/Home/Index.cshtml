@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Upload and Calc";
+}
+    <form method="post" enctype="multipart/form-data" asp-controller="FileUpload" asp-action="Index" onsubmit="AJAXSubmit(this);return false;">
+        
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="file" name="files" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="submit" value="Upload" />
+            </div>
+        </div>
+        <div id="upload_status"></div>
+        <div id="ajax_results" class="hide">
+            <table>
+                <tr>
+                    <td>Mean:</td>
+                    <td id="mean">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Standard Deviation:</td>
+                    <td id="stddev">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Ranges:</td>
+                    <td id="ranges">&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+    </form>
+
+<script>
+    async function AJAXSubmit(oFormElement) {
+
+        const formData = new FormData(oFormElement);
+
+        try {
+            document.getElementById("upload_status").innerHTML = "Status: Uploading.  Please wait...";
+            document.getElementById("ajax_results").className = "hide";
+
+            let response = await fetch(oFormElement.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            let data = await response.json();
+
+           
+            document.getElementById("mean").innerHTML = data.mean;
+            document.getElementById("stddev").innerHTML =  data.stddev;
+            document.getElementById("ranges").innerHTML = data.range.split(';').join('<br />');
+
+            document.getElementById("upload_status").innerHTML = "Status: Success!";
+            document.getElementById("ajax_results").className = "";
+            
+        } catch (error) {
+            document.getElementById("upload_status").innerHTML = "Status: Failure :(";
+            document.getElementById("ajax_results").className = "hide";
+
+            console.error('Error:', error);
+        }
+    }
+</script>
